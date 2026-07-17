@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Pagination</title>
+
+<style>
+
+table{
+border-collapse:collapse;
+width:70%;
+margin:auto;
+}
+
+td,th{
+border:1px solid black;
+padding:10px;
+text-align:center;
+}
+
+button{
+margin:20px;
+padding:10px 20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2 align="center">Students</h2>
+
+<table id="studentTable">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<center>
+
+<button onclick="previousPage()">Previous</button>
+
+<span id="pageNo">1</span>
+
+<button onclick="nextPage()">Next</button>
+
+</center>
+
+<p align="center">
+Total Records :
+<span id="totalRecords">20</span>
+</p>
+
+<script>
+
+const students=[];
+
+for(let i=1;i<=20;i++)
+{
+students.push({
+id:i,
+name:"Student "+i
+});
+}
+
+let currentPage=1;
+
+const recordsPerPage=10;
+
+function loadTable(){
+
+let tbody=document.querySelector("#studentTable tbody");
+
+tbody.innerHTML="";
+
+let start=(currentPage-1)*recordsPerPage;
+
+let end=start+recordsPerPage;
+
+students.slice(start,end).forEach(student=>{
+
+tbody.innerHTML+=`
+<tr>
+<td>${student.id}</td>
+<td>${student.name}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("pageNo").innerText=currentPage;
+
+}
+
+function nextPage(){
+
+if(currentPage<2){
+
+currentPage++;
+
+loadTable();
+
+}
+
+}
+
+function previousPage(){
+
+if(currentPage>1){
+
+currentPage--;
+
+loadTable();
+
+}
+
+}
+
+loadTable();
+
+</script>
+
+</body>
+
+</html>

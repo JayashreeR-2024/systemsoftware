@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student List</title>
+
+    <script>
+        let ascending = true;
+
+        function sortTable() {
+            let table = document.getElementById("studentTable");
+            let rows = Array.from(table.rows).slice(1);
+
+            rows.sort(function(a, b) {
+                let x = a.cells[0].innerHTML.toLowerCase();
+                let y = b.cells[0].innerHTML.toLowerCase();
+
+                if (ascending) {
+                    return x.localeCompare(y);
+                } else {
+                    return y.localeCompare(x);
+                }
+            });
+
+            for (let row of rows) {
+                table.appendChild(row);
+            }
+
+            ascending = !ascending;
+        }
+    </script>
+</head>
+
+<body>
+
+<h2>Student List</h2>
+
+<table border="1" id="studentTable">
+    <tr>
+        <th onclick="sortTable()">Name</th>
+        <th>Age</th>
+    </tr>
+
+    <tr>
+        <td>John</td>
+        <td>20</td>
+    </tr>
+
+    <tr>
+        <td>Alice</td>
+        <td>21</td>
+    </tr>
+
+    <tr>
+        <td>David</td>
+        <td>19</td>
+    </tr>
+
+    <tr>
+        <td>Bob</td>
+        <td>22</td>
+    </tr>
+
+</table>
+
+</body>
+</html>
