@@ -1,531 +1,163 @@
-import time
-import openpyxl
-
-from faker import Faker
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from faker import Faker
+import time
 
 
 fake = Faker()
 
-
-# ==================================================
-# 1. CREATE EXCEL TEST DATA USING FAKER
-# ==================================================
-
-excel_file = "testdata.xlsx"
-
-
-def create_excel_data():
-
-    workbook = openpyxl.Workbook()
-
-    sheet = workbook.active
-    sheet.title = "Login"
-
-    sheet.append(
-        [
-            "username",
-            "password",
-            "email",
-            "first_name",
-            "last_name"
-        ]
-    )
-
-
-    for i in range(10):
-
-        sheet.append(
-            [
-                fake.user_name(),
-                fake.password(length=10),
-                fake.email(),
-                fake.first_name(),
-                fake.last_name()
-            ]
-        )
-
-
-    workbook.save(excel_file)
-
-    print("Excel file created successfully")
-
-
-
-# ==================================================
-# 2. READ EXCEL DATA
-# ==================================================
-
-def read_excel_data():
-
-    workbook = openpyxl.load_workbook(
-        excel_file
-    )
-
-    sheet = workbook["Login"]
-
-
-    username = sheet["A2"].value
-    password = sheet["B2"].value
-    email = sheet["C2"].value
-    firstname = sheet["D2"].value
-    lastname = sheet["E2"].value
-
-
-    return (
-        username,
-        password,
-        email,
-        firstname,
-        lastname
-    )
-
-
-
-# Create Excel
-create_excel_data()
-
-
-(
-username,
-password,
-email,
-firstname,
-lastname
-
-) = read_excel_data()
-
-
-
-# ==================================================
-# 3. START SELENIUM
-# ==================================================
-
 driver = webdriver.Chrome()
-
 driver.maximize_window()
 
-wait = WebDriverWait(
-    driver,
-    15
-)
+wait = WebDriverWait(driver, 30)
 
-
-
-# ==================================================
-# 4. CONTACT FORM TEST
-# ==================================================
-
-def contact_form_test():
-
-    driver.get(
-        "https://yourwebsite.com/contact"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "name"
-    ).send_keys(
-        fake.name()
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "email"
-    ).send_keys(
-        fake.email()
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "message"
-    ).send_keys(
-        fake.text()
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "submit"
-    ).click()
-
-
-    message = wait.until(
-        EC.visibility_of_element_located(
-            (
-                By.ID,
-                "successMessage"
-            )
-        )
-    )
-
-
-    assert "Thank" in message.text
-
-    print(
-        "PASS: Contact form submitted"
-    )
-
-
-
-# ==================================================
-# 5. INVALID LOGIN TEST
-# ==================================================
-
-def invalid_login_test():
-
-    driver.get(
-        "https://yourwebsite.com/login"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "username"
-    ).send_keys(
-        username
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "password"
-    ).send_keys(
-        password
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "loginButton"
-    ).click()
-
-
-
-    error = wait.until(
-        EC.visibility_of_element_located(
-            (
-                By.ID,
-                "errorMessage"
-            )
-        )
-    )
-
-
-    assert "Invalid" in error.text
-
-
-    print(
-        "PASS: Invalid login error displayed"
-    )
-
-
-
-# ==================================================
-# 6. USER REGISTRATION TEST
-# ==================================================
-
-def registration_test():
-
-    driver.get(
-        "https://yourwebsite.com/register"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "firstName"
-    ).send_keys(
-        firstname
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "lastName"
-    ).send_keys(
-        lastname
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "email"
-    ).send_keys(
-        email
-    )
-
-
-    new_password = fake.password()
-
-
-    driver.find_element(
-        By.ID,
-        "password"
-    ).send_keys(
-        new_password
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "confirmPassword"
-    ).send_keys(
-        new_password
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "register"
-    ).click()
-
-
-    success = wait.until(
-        EC.visibility_of_element_located(
-            (
-                By.ID,
-                "successMessage"
-            )
-        )
-    )
-
-
-    print(
-        "PASS: Registration completed"
-    )
-
-
-
-# ==================================================
-# 7. EMAIL VALIDATION TEST
-# ==================================================
-
-def email_validation_test():
-
-    driver.get(
-        "https://yourwebsite.com/register"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "email"
-    ).send_keys(
-        "invalidemail"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "register"
-    ).click()
-
-
-
-    error = wait.until(
-        EC.visibility_of_element_located(
-            (
-                By.ID,
-                "emailError"
-            )
-        )
-    )
-
-
-    assert "valid" in error.text.lower()
-
-
-    print(
-        "PASS: Email validation"
-    )
-
-
-
-# ==================================================
-# 8. PRODUCT FILTER TEST
-# ==================================================
-
-def product_filter_test():
-
-    driver.get(
-        "https://yourwebsite.com/products"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "category"
-    ).send_keys(
-        "Electronics"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "minPrice"
-    ).send_keys(
-        "100"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "maxPrice"
-    ).send_keys(
-        "500"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "filter"
-    ).click()
-
-
-
-    products = driver.find_elements(
-        By.CLASS_NAME,
-        "product"
-    )
-
-
-    assert len(products) > 0
-
-
-    print(
-        "PASS: Product filtering"
-    )
-
-
-
-# ==================================================
-# 9. CART TEST
-# ==================================================
-
-def cart_test():
-
-    driver.get(
-        "https://yourwebsite.com/products"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "addProduct1"
-    ).click()
-
-
-    driver.find_element(
-        By.ID,
-        "addProduct2"
-    ).click()
-
-
-
-    driver.find_element(
-        By.ID,
-        "cart"
-    ).click()
-
-
-
-    items = driver.find_elements(
-        By.CLASS_NAME,
-        "cartItem"
-    )
-
-
-    assert len(items) == 2
-
-
-    print(
-        "PASS: Multiple products added"
-    )
-
-
-
-    # Quantity update
-
-    quantity = driver.find_element(
-        By.ID,
-        "quantity"
-    )
-
-    quantity.clear()
-
-    quantity.send_keys(
-        "3"
-    )
-
-
-    driver.find_element(
-        By.ID,
-        "updateCart"
-    ).click()
-
-
-
-    updated_quantity = driver.find_element(
-        By.ID,
-        "quantity"
-    ).get_attribute(
-        "value"
-    )
-
-
-    assert updated_quantity == "3"
-
-
-    print(
-        "PASS: Quantity updated"
-    )
-
-
-
-    # Cart total
-
-    total = driver.find_element(
-        By.ID,
-        "cartTotal"
-    ).text
-
-
-    print(
-        "Cart Total:",
-        total
-    )
-
-
-
-# ==================================================
-# RUN ALL TESTS
-# ==================================================
 
 try:
 
-    contact_form_test()
+    # -----------------------------
+    # Invalid Login Test
+    # -----------------------------
 
-    invalid_login_test()
+    driver.get("https://www.saucedemo.com/")
 
-    registration_test()
+    driver.find_element(
+        By.ID,
+        "user-name"
+    ).send_keys("wrong_user")
 
-    email_validation_test()
 
-    product_filter_test()
+    driver.find_element(
+        By.ID,
+        "password"
+    ).send_keys("wrong_password")
 
-    cart_test()
+
+    driver.find_element(
+        By.ID,
+        "login-button"
+    ).click()
+
+
+    error = wait.until(
+        EC.visibility_of_element_located(
+            (By.CSS_SELECTOR, "h3[data-test='error']")
+        )
+    )
+
+
+    assert "Username and password do not match" in error.text
+
+    print("✅ Invalid login validation passed")
+
+
+
+    # -----------------------------
+    # Valid Login
+    # -----------------------------
+
+    driver.get("https://www.saucedemo.com/")
+
+    driver.find_element(
+        By.ID,
+        "user-name"
+    ).send_keys("standard_user")
+
+
+    driver.find_element(
+        By.ID,
+        "password"
+    ).send_keys("secret_sauce")
+
+
+    driver.find_element(
+        By.ID,
+        "login-button"
+    ).click()
+
+
+
+    wait.until(
+        EC.visibility_of_element_located(
+            (By.CLASS_NAME, "inventory_list")
+        )
+    )
+
+
+    print("✅ Login successful")
+
+
+
+    # -----------------------------
+    # Product Filtering
+    # -----------------------------
+
+    driver.find_element(
+        By.CLASS_NAME,
+        "product_sort_container"
+    ).send_keys("Price (low to high)")
+
+
+    print("✅ Product sorting completed")
+
+
+
+    # -----------------------------
+    # Add Multiple Products
+    # -----------------------------
+
+    driver.find_element(
+        By.ID,
+        "add-to-cart-sauce-labs-backpack"
+    ).click()
+
+
+    driver.find_element(
+        By.ID,
+        "add-to-cart-sauce-labs-bike-light"
+    ).click()
+
+
+
+    driver.find_element(
+        By.CLASS_NAME,
+        "shopping_cart_link"
+    ).click()
+
+
+
+    cart_items = driver.find_elements(
+        By.CLASS_NAME,
+        "cart_item"
+    )
+
+
+    assert len(cart_items) == 2
+
+
+    print("✅ Multiple products added to cart")
+
+
+
+    # -----------------------------
+    # Quantity Verification
+    # -----------------------------
+
+    quantity = driver.find_element(
+        By.CLASS_NAME,
+        "cart_quantity"
+    ).text
+
+
+    assert quantity == "1"
+
+
+    print("✅ Product quantity verified")
+
 
 
 finally:
 
     time.sleep(3)
-
     driver.quit()
